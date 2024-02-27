@@ -652,6 +652,7 @@ function _Chat() {
 
   const chatStore = useChatStore();
   const session = chatStore.currentSession();
+  const currentModel = session.mask.modelConfig.model;
   const config = useAppConfig();
   const fontSize = config.fontSize;
 
@@ -1146,6 +1147,38 @@ function _Chat() {
     setAttachImages(images);
   }
 
+  async function handlePaste(event: {
+    clipboardData: { items: any };
+    preventDefault: () => void;
+  }) {
+    if (!isVisionModel(currentModel)) {
+      return;
+    }
+    const items = event.clipboardData.items;
+    let imagesData = [];
+
+    for (const item of items) {
+      if (item.type.indexOf("image") === 0) {
+        setUploading(true);
+        const file = item.getAsFile();
+        try {
+          const dataUrl = await compressImage(file, 256 * 1024);
+          imagesData.push(dataUrl);
+        } catch (e) {
+          // Handle compression error
+          setUploading(false);
+        }
+      }
+    }
+
+    if (imagesData.length > 0) {
+      // Got image data, update the attachImages state
+      setUploading(false);
+      setAttachImages([...attachImages, ...imagesData]);
+      event.preventDefault(); // Prevent the default paste action
+    }
+  }
+
   return (
     <div className={styles.chat} key={session.id}>
       <div className="window-header" data-tauri-drag-region>
@@ -1449,6 +1482,7 @@ function _Chat() {
             onKeyDown={onInputKeyDown}
             onFocus={scrollToBottom}
             onClick={scrollToBottom}
+            onPaste={handlePaste}
             rows={inputRows}
             autoFocus={autoFocus}
             style={{
