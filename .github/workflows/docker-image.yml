@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ "main" ]
 
+env:
+  DOCKER_USERNAME: lunette9 # Docker Hub 的用户名
+  REPOSITORY_NAME: ${{ github.event.repository.name }} # GitHub 仓库名
+
 jobs:
 
   build-and-push:
@@ -15,10 +19,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    # 构建 Docker 镜像并打标签为 latest
+    # 构建 Docker 镜像并打标签，结合 Docker Hub 用户名和 GitHub 仓库名
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag lunette9/chatgpt-next-web:latest
-      
+      run: docker build . --file Dockerfile --tag $DOCKER_USERNAME/$REPOSITORY_NAME:latest
+
     # 登录至 Docker Hub 
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
@@ -26,8 +30,6 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         
-    # 推送 latest 标签的镜像至 Docker Hub
+    # 推送镜像至 Docker Hub，镜像标签包含 Docker 用户名和 GitHub 仓库名
     - name: Push the Docker image
-      run: docker push lunette9/chatgpt-next-web:latest
-  
-            
+      run: docker push $DOCKER_USERNAME/$REPOSITORY_NAME:latest
