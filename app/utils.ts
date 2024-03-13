@@ -9,8 +9,9 @@ export function trimTopic(topic: string) {
   // This will remove the specified punctuation from the end of the string
   // and also trim quotes from both the start and end if they exist.
   return topic
-    .replace(/^["“”]+|["“”]+$/g, "")
-    .replace(/[，。！？”“"、,.!?]*$/, "");
+    // fix for gemini
+    .replace(/^["“”*]+|["“”*]+$/g, "")
+    .replace(/[，。！？”“"、,.!?*]*$/, "");
 }
 
 export async function copyToClipboard(text: string) {
@@ -56,9 +57,9 @@ export async function downloadAs(text: string, filename: string) {
 
     if (result !== null) {
       try {
-        await window.__TAURI__.fs.writeBinaryFile(
+        await window.__TAURI__.fs.writeTextFile(
           result,
-          new Uint8Array([...text].map((c) => c.charCodeAt(0))),
+          text
         );
         showToast(Locale.Download.Success);
       } catch (error) {
