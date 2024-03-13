@@ -1101,11 +1101,13 @@ function _Chat() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  
+
   const handlePaste = useCallback(
     async (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
       const currentModel = chatStore.currentSession().mask.modelConfig.model;
-      if(!isVisionModel(currentModel)){return;}
+      if (!isVisionModel(currentModel)) {
+        return;
+      }
       const items = (event.clipboardData || window.clipboardData).items;
       for (const item of items) {
         if (item.kind === "file" && item.type.startsWith("image/")) {
@@ -1188,37 +1190,37 @@ function _Chat() {
     setAttachImages(images);
   }
 
-  async function handlePaste(event: {
-    clipboardData: { items: any };
-    preventDefault: () => void;
-  }) {
-    if (!isVisionModel(currentModel)) {
-      return;
-    }
-    const items = event.clipboardData.items;
-    let imagesData = [];
+  // async function handlePaste(event: {
+  //   clipboardData: { items: any };
+  //   preventDefault: () => void;
+  // }) {
+  //   if (!isVisionModel(currentModel)) {
+  //     return;
+  //   }
+  //   const items = event.clipboardData.items;
+  //   let imagesData = [];
 
-    for (const item of items) {
-      if (item.type.indexOf("image") === 0) {
-        setUploading(true);
-        const file = item.getAsFile();
-        try {
-          const dataUrl = await compressImage(file, 256 * 1024);
-          imagesData.push(dataUrl);
-        } catch (e) {
-          // Handle compression error
-          setUploading(false);
-        }
-      }
-    }
+  //   for (const item of items) {
+  //     if (item.type.indexOf("image") === 0) {
+  //       setUploading(true);
+  //       const file = item.getAsFile();
+  //       try {
+  //         const dataUrl = await compressImage(file, 256 * 1024);
+  //         imagesData.push(dataUrl);
+  //       } catch (e) {
+  //         // Handle compression error
+  //         setUploading(false);
+  //       }
+  //     }
+  //   }
 
-    if (imagesData.length > 0) {
-      // Got image data, update the attachImages state
-      setUploading(false);
-      setAttachImages([...attachImages, ...imagesData]);
-      event.preventDefault(); // Prevent the default paste action
-    }
-  }
+  //   if (imagesData.length > 0) {
+  //     // Got image data, update the attachImages state
+  //     setUploading(false);
+  //     setAttachImages([...attachImages, ...imagesData]);
+  //     event.preventDefault(); // Prevent the default paste action
+  //   }
+  // }
 
   return (
     <div className={styles.chat} key={session.id}>
